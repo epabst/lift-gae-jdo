@@ -15,12 +15,9 @@
  */
 package com.jcraft.lift.model
 
-import _root_.javax.jdo.PersistenceManager
 import _root_.org.scala_libs.jdo._
+import lift.RequestPMFactory
 
-object Model extends LocalPMFactory("transactions-optional") 
-              with ScalaPersistenceManager with ScalaPMFactory {
-  protected def pm = openPM
-  val factory = this
-  def getUnderlying : PersistenceManager = pm
+object Model extends RequestPMFactory("transactions-optional") with ScalaPMFactory with ScalaPersistenceManager {
+  protected val factory = this
 }

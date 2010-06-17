@@ -15,7 +15,7 @@
  */
 package com.jcraft.lift.snippet
 
-import _root_.java.text.{ParseException,SimpleDateFormat}
+import _root_.java.text.ParseException
 import _root_.scala.xml.{NodeSeq,Text}
 import _root_.net.liftweb.http.{RequestVar,S,SHtml}
 import _root_.net.liftweb.common._
@@ -30,7 +30,6 @@ import _root_.com.google.appengine.api.datastore.Key
 import _root_.com.google.appengine.api.datastore.KeyFactory._
 import _root_.javax.jdo.JDOUserException
 
-import _root_.org.scala_libs.jdo._
 import _root_.org.scala_libs.jdo.criterion._
 
 object BookOps {
@@ -41,7 +40,7 @@ class BookOps {
   val formatter = new java.text.SimpleDateFormat("yyyyMMdd")
 
   def list (xhtml : NodeSeq) : NodeSeq = {
-    val books = Model.withPM{ from(_, classOf[Book]).resultList }
+    val books = from(classOf[Book]).resultList
 
     books.flatMap(book =>
       bind("book", xhtml,
@@ -83,14 +82,7 @@ class BookOps {
   def findAuthor(a:Author):Author = findAuthorById(a.id)
   def findAuthorById(id:String):Author = findAuthorById(stringToKey(id))
   def findAuthorById(id:Key):Author = {
-    Model.withPM{ pm =>
-      getObjectById[Author](pm, classOf[Author], id) match {
-        case Some(author) =>
-          pm.detachCopyAll(author.books)
-          author
-        case _ => null
-      }
-    }
+    getObjectById[Author](classOf[Author], id).getOrElse(null)
   }
 
   def add (xhtml : NodeSeq) : NodeSeq = {
@@ -117,7 +109,7 @@ class BookOps {
 
     lazy val current = book
 
-    val authors = Model.withPM{ from(_, classOf[Author]).resultList }
+    val authors = from(classOf[Author]).resultList
 
     val choices = authors.map(author => 
       (keyToString(author.id) -> author.name)).toList
@@ -156,12 +148,10 @@ class BookOps {
     var title = ""
 
     def doSearch () = {
-      val l = Model.withPM{
-        from(_, classOf[Book])
+      val l = from(classOf[Book])
             .where(geC("title", title),
                    ltC("title", title+"\ufffd"))
             .resultList
-      }
 
       BookOps.resultVar(l)
     }

@@ -30,14 +30,12 @@ import _root_.org.scala_libs.jdo.criterion._
 class AuthorOps {
 
   def list (xhtml : NodeSeq) : NodeSeq = {
-    val authors = Model.withPM{ from(_, classOf[Author]).resultList }
+    val authors = from(classOf[Author]).resultList
 
     def findBooksByAuthor(a:Author) = {
-      Model.withPM{ 
-        from(_, classOf[Book])
-            .where(eqC("author", a))
-            .resultList 
-      }
+      from(classOf[Book])
+          .where(eqC("author", a))
+          .resultList
     }
 
     authors.flatMap(author =>
