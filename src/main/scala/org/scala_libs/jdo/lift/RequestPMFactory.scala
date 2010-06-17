@@ -17,24 +17,20 @@
 package org.scala_libs.jdo.lift
 
 import javax.jdo.PersistenceManager
-import org.scala_libs.jdo.{LocalPMFactory, ScalaPMFactory}
 import net.liftweb.http.{S, RequestVar}
+import org.scala_libs.jdo.{ContextPMFactory, LocalPMFactory}
 
-class RequestPMFactory(val unitName : String)
-  extends ScalaPMFactory {
-  val localFactory = new LocalPMFactory(unitName)
+class RequestPMFactory(unitName : String) extends ContextPMFactory(unitName) {
 
   private object requestPM extends RequestVar[PersistenceManager]({
-    val _pm = localFactory.openPM
-    S.addCleanupFunc(() => localFactory.closePM(_pm))
+    val _pm = underlying.openPM
+    S.addCleanupFunc(() => {
+      underlying.closePM(_pm)
+    })
     _pm
   })
 
-  def pm = requestPM.is
-
-  protected def openPM () : PersistenceManager = pm
-
-  //does nothing.  It will be closed when the request finishes
-  protected[jdo] def closePM (pm : PersistenceManager) : Unit = {}
-
+  def getOrOpenPMAndRegisterCleanup : PersistenceManager = {
+    requestPM.is
+  }
 }
