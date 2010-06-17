@@ -16,17 +16,24 @@
 package org.scala_libs.jdo
 
 import javax.jdo.PersistenceManager
-
+import org.scala_tools.javautils.Implicits._
+                                       
 trait ScalaPersistenceManager {
 
   protected def pm : PersistenceManager
 
-  val factory : ScalaPMFactory 
+  protected val factory : ScalaPMFactory 
 
-  def from[A](pm:PersistenceManager, c:Class[A]) = new ScalaQuery[A](pm, c)
-  def getObjectById[A](pm:PersistenceManager, c:Class[A], key:Object):Option[A] = 
+  def from[A](c:Class[A]) = new ScalaQuery[A](pm, c)
+  def getObjectById[A](c:Class[A], key:Object):Option[A] =
     pm.getObjectById(c, key).asInstanceOf[A] match{
       case null => None
       case a => Some(a)
     }
+  def getObjectsById[A](c:Class[A], keys:Seq[Object]):Collection[A] =
+    keys match {
+      case Nil => List[A]()
+      case _ => pm.getObjectsById(keys.asJava).asInstanceOf[java.util.Collection[A]].asScala
+    }
+
 }

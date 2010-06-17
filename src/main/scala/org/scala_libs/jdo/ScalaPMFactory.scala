@@ -22,7 +22,30 @@ trait ScalaPMFactory {
   protected def openPM () : PersistenceManager
  
   protected[jdo] def closePM (pm : PersistenceManager) : Unit
- 
+
+  def withPM[A](f: PersistenceManager => A):A={
+    val _pm = openPM
+    try{ f(_pm) }
+    finally{ closePM(_pm) }
+  }
+
+  def inTX[A](f: PersistenceManager => A):A={
+    val _pm = openPM
+    val tx = _pm.currentTransaction
+    try{
+      tx.begin
+      f(_pm) match {
+        case a => tx.commit; a
+      }
+    }
+    finally{
+      if(tx.isActive){
+        tx.rollback
+      }
+      closePM(_pm)
+    }
+  }
+
   def newPM : ScalaPersistenceManager = {
     val underlying = openPM()
     val owner = this

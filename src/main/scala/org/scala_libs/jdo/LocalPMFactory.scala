@@ -30,28 +30,4 @@ class LocalPMFactory(val unitName : String)
   def closePM (pm : PersistenceManager) = {
     pm.close()
   }
-
-  def withPM[A](f: PersistenceManager => A):A={
-    val _pm = openPM
-    try{ f(_pm) }
-    finally{ closePM(_pm) }   
-  }
-
-  def inTX[A](f: PersistenceManager => A):A={
-    val _pm = openPM
-    val tx = _pm.currentTransaction
-    try{ 
-      tx.begin
-      f(_pm) match {
-        case a => tx.commit; a
-      } 
-    }
-    finally{
-      if(tx.isActive){
-        tx.rollback
-      }
-      closePM(_pm) 
-    }   
-  }
-
 }
