@@ -305,13 +305,6 @@
       </plugin>
 
       <plugin>
-        <artifactId>maven-war-plugin</artifactId>
-        <configuration>
-          <webappDirectory>${basedir}/war</webappDirectory>
-        </configuration>
-      </plugin>
-
-      <plugin>
         <groupId>net.kindleit</groupId>
         <artifactId>maven-gae-plugin</artifactId>
         <version>0.6.0</version>
