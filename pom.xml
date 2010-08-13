@@ -112,7 +112,7 @@
     <dependency>
       <groupId>com.google.appengine</groupId>
       <artifactId>jdo2-api</artifactId>
-      <version>2.3-SNAPSHOT</version>
+      <version>2.3-eb</version>
     </dependency>
     <dependency>
       <groupId>com.google.appengine</groupId>
@@ -178,13 +178,6 @@
       <version>1.0.7.final</version>
       <scope>runtime</scope>
     </dependency>
-<!--
-    <dependency>
-      <groupId>com.google.appengine</groupId>
-      <artifactId>jdo2-api</artifactId>
-      <version>2.3-SNAPSHOT</version>
-    </dependency>
--->
 
     <dependency>
       <groupId>javax.jdo</groupId>
@@ -192,11 +185,19 @@
       <version>2.3-eb</version>
     </dependency>
 
-<!-- <dependency>
+    <dependency>
+      <groupId>javax.persistence</groupId>
+      <artifactId>persistence-api</artifactId>
+      <version>1.0</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.datanucleus</groupId>
       <artifactId>datanucleus-jpa</artifactId>
       <version>2.1.1</version>
-    </dependency> -->   
+      <scope>runtime</scope>
+    </dependency>
 
     <dependency>
       <groupId>org.datanucleus</groupId>
