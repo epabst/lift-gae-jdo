@@ -16,8 +16,7 @@
 package org.scala_libs.jdo
 
 import javax.jdo.PersistenceManager
-import org.scala_tools.javautils.Implicits._
-                                       
+
 trait ScalaPersistenceManager {
 
   protected def pm : PersistenceManager
@@ -30,10 +29,8 @@ trait ScalaPersistenceManager {
       case null => None
       case a => Some(a)
     }
-  def getObjectsById[A](c:Class[A], keys:Seq[Object]):Collection[A] =
-    keys match {
-      case Nil => List[A]()
-      case _ => pm.getObjectsById(keys.asJava).asInstanceOf[java.util.Collection[A]].asScala
-    }
-
+  def getObjectsById[A](c:Class[A], keys:Seq[Object]):Collection[A] = {
+    //do them one at a time because datanucleus wasn't working for some reason in bulk
+    keys.map{getObjectById(c, _)}.filter(_.isDefined).map(_.get)
+  }
 }
