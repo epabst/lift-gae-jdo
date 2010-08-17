@@ -5,6 +5,7 @@ import com.google.appengine.tools.development.testing.{LocalServiceTestHelper, L
 import test.model.SampleEntity
 import com.jcraft.lift.model.Model.pm
 import com.jcraft.lift.model.Model
+import javax.jdo.JDOHelper
 
 /**
  * Created by IntelliJ IDEA.
@@ -16,6 +17,11 @@ import com.jcraft.lift.model.Model
 
 class ScalaPersistenceManagerSpec extends SpecificationWithJUnit {
   val helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+  Model.pmSource = new PersistenceManagerSource(JDOHelper.getPersistenceManagerFactory("transactions-optional")) {
+    private var _pm = openPM
+    def pm : ScalaPersistenceManager = _pm
+    def removePM() = {_pm = openPM}
+  }
 
   "it should handle getObjectsById" in {
     helper.setUp
@@ -24,7 +30,7 @@ class ScalaPersistenceManagerSpec extends SpecificationWithJUnit {
     val entityId = entity.id
 
     Model.closePM
-    val persistedEntities = Model.getObjectsById(classOf[SampleEntity], List(entityId))
+    val persistedEntities = pm.getObjectsById(classOf[SampleEntity], List(entityId))
     persistedEntities.size must beEqual(1)
   }
 

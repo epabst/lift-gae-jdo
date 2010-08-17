@@ -19,14 +19,20 @@ import javax.jdo.PersistenceManager
 
 class ScalaPersistenceManager(val javaPM : PersistenceManager) {
 
-  def from[A](c:Class[A]) = new ScalaQuery[A](pm, c)
+  def from[A](c:Class[A]) = new ScalaQuery[A](javaPM, c)
   def getObjectById[A](c:Class[A], key:Object):Option[A] =
-    pm.getObjectById(c, key).asInstanceOf[A] match{
+    javaPM.getObjectById(c, key).asInstanceOf[A] match{
       case null => None
       case a => Some(a)
     }
   def getObjectsById[A](c:Class[A], keys:Seq[Object]):Collection[A] = {
     //do them one at a time because datanucleus wasn't working for some reason in bulk
     keys.map{getObjectById(c, _)}.filter(_.isDefined).map(_.get)
+  }
+  def makePersistent[A](obj:A) = {
+    javaPM.makePersistent(obj)
+  }
+  def deletePersistent[A](obj:A) = {
+    javaPM.deletePersistent(obj)
   }
 }

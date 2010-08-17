@@ -34,7 +34,7 @@ class RequestPersistenceManagerSource(factory : => PersistenceManagerFactory) ex
     requestPM.is
   }
 
-  def removePM = {
+  def removePM() = {
     //todo verify that a new one automatically gets created if requested after remove has been called.
     requestPM.remove
   }

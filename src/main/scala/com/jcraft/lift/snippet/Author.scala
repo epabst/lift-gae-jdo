@@ -30,10 +30,10 @@ import _root_.org.scala_libs.jdo.criterion._
 class AuthorOps {
 
   def list (xhtml : NodeSeq) : NodeSeq = {
-    val authors = from(classOf[Author]).resultList
+    val authors = pm.from(classOf[Author]).resultList
 
     def findBooksByAuthor(a:Author) = {
-      from(classOf[Book])
+      pm.from(classOf[Book])
           .where(eqC("author", a))
           .resultList
     }
@@ -49,7 +49,7 @@ class AuthorOps {
                                 () => authorVar(author),
                                 Text(?("Edit"))),
            "delete" -> SHtml.link("list.html", 
-                                () => Model.withPM{ _.deletePersistent(author)},
+                                () => pm.deletePersistent(author),
                                 Text(?("Delete")))))
   }
 
@@ -62,7 +62,7 @@ class AuthorOps {
         error("emptyAuthor", "The author's name cannot be blank")
       } 
       else {
-        Model.withPM{ _.makePersistent(author) }
+        pm.makePersistent(author)
         redirectTo("list.html")
       }
     }

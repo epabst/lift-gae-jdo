@@ -23,5 +23,6 @@ object Model {
    */
   var pmSource : PersistenceManagerSource = _
   
-  def pm : ScalaPersistenceManager = pmSource.pm
+  def pm : ScalaPersistenceManager = { pmSource.pm }
+  def closePM = pmSource.closePM
 }

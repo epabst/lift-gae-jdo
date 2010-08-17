@@ -40,7 +40,7 @@ class BookOps {
   val formatter = new java.text.SimpleDateFormat("yyyyMMdd")
 
   def list (xhtml : NodeSeq) : NodeSeq = {
-    val books = from(classOf[Book]).resultList
+    val books = pm.from(classOf[Book]).resultList
 
     books.flatMap(book =>
       bind("book", xhtml,
@@ -52,7 +52,7 @@ class BookOps {
                                 () => bookVar(book), 
                                 Text(?("Edit"))),
            "delete" -> SHtml.link("list.html", 
-                                () => Model.withPM{ _.deletePersistent(book)},
+                                () => pm.deletePersistent(book),
                                 Text(?("Delete")))))
   }
 
@@ -82,7 +82,7 @@ class BookOps {
   def findAuthor(a:Author):Author = findAuthorById(a.id)
   def findAuthorById(id:String):Author = findAuthorById(stringToKey(id))
   def findAuthorById(id:Key):Author = {
-    getObjectById[Author](classOf[Author], id).getOrElse(null)
+    pm.getObjectById[Author](classOf[Author], id).getOrElse(null)
   }
 
   def add (xhtml : NodeSeq) : NodeSeq = {
@@ -90,14 +90,12 @@ class BookOps {
     def doAdd () = 
       if (is_valid_Book_?(book)) {
         try{
-          Model.withPM{ pm =>
-            book.id match {
-              case null => 
-                book.author.books.add(book)
-                pm.makePersistent(book.author)
-              case _ => 
-                pm.makePersistent(book)
-            }
+          book.id match {
+            case null =>
+              book.author.books.add(book)
+              pm.makePersistent(book.author)
+            case _ =>
+              pm.makePersistent(book)
           }
           redirectTo("list")
         } 
@@ -109,7 +107,7 @@ class BookOps {
 
     lazy val current = book
 
-    val authors = from(classOf[Author]).resultList
+    val authors = pm.from(classOf[Author]).resultList
 
     val choices = authors.map(author => 
       (keyToString(author.id) -> author.name)).toList
@@ -148,7 +146,7 @@ class BookOps {
     var title = ""
 
     def doSearch () = {
-      val l = from(classOf[Book])
+      val l = pm.from(classOf[Book])
             .where(geC("title", title),
                    ltC("title", title+"\ufffd"))
             .resultList

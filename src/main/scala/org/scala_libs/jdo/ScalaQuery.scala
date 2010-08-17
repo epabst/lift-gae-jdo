@@ -29,7 +29,7 @@ object ScalaQuery{
   }
 }
 
-class ScalaQuery[A](val pm:PersistenceManager, val clss:Class[A]){
+class ScalaQuery[A](javaPM:PersistenceManager, val clss:Class[A]){
 
   import ScalaQuery._
 
@@ -60,7 +60,7 @@ class ScalaQuery[A](val pm:PersistenceManager, val clss:Class[A]){
   }
 
   def newQuery = {
-    val query = pm.newQuery(clss)
+    val query = javaPM.newQuery(clss)
     filter match{
       case "" =>
       case f => query.setFilter(f)

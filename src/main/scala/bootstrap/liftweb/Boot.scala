@@ -33,7 +33,7 @@ import javax.jdo.JDOHelper
  */
 class Boot {
   def boot {
-    Model.pmSource = new RequestPersistenceManagerSource(JDOHelper.getPersistenceManager("transactions-optional"))
+    Model.pmSource = new RequestPersistenceManagerSource(JDOHelper.getPersistenceManagerFactory("transactions-optional"))
 
     LiftRules.addToPackages("com.jcraft.lift")
 
