@@ -17,11 +17,7 @@ package org.scala_libs.jdo
 
 import javax.jdo.PersistenceManager
 
-trait ScalaPersistenceManager {
-
-  protected def pm : PersistenceManager
-
-  protected val factory : ScalaPMFactory 
+class ScalaPersistenceManager(val javaPM : PersistenceManager) {
 
   def from[A](c:Class[A]) = new ScalaQuery[A](pm, c)
   def getObjectById[A](c:Class[A], key:Object):Option[A] =

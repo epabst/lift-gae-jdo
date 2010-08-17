@@ -16,21 +16,26 @@
 
 package org.scala_libs.jdo.lift
 
-import javax.jdo.PersistenceManager
 import net.liftweb.http.{S, RequestVar}
-import org.scala_libs.jdo.{ContextPMFactory, LocalPMFactory}
+import javax.jdo.PersistenceManagerFactory
+import org.scala_libs.jdo.{ScalaPersistenceManager, PersistenceManagerSource}
 
-class RequestPMFactory(unitName : String) extends ContextPMFactory(unitName) {
+class RequestPersistenceManagerSource(factory : => PersistenceManagerFactory) extends PersistenceManagerSource(factory) {
 
-  private object requestPM extends RequestVar[PersistenceManager]({
-    val _pm = underlying.openPM
+  private object requestPM extends RequestVar[ScalaPersistenceManager]({
+    val _pm = openPM
     S.addCleanupFunc(() => {
-      underlying.closePM(_pm)
+      closePM
     })
     _pm
   })
 
-  def getOrOpenPMAndRegisterCleanup : PersistenceManager = {
+  def pm : ScalaPersistenceManager = {
     requestPM.is
+  }
+
+  def removePM = {
+    //todo verify that a new one automatically gets created if requested after remove has been called.
+    requestPM.remove
   }
 }

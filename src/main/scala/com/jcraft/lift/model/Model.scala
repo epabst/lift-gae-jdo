@@ -16,8 +16,12 @@
 package com.jcraft.lift.model
 
 import _root_.org.scala_libs.jdo._
-import lift.RequestPMFactory
 
-object Model extends RequestPMFactory("transactions-optional") with ScalaPMFactory with ScalaPersistenceManager {
-  protected val factory = this
+object Model {
+  /**
+   * Should be set before using.  Bootstrap is the recommended location.
+   */
+  var pmSource : PersistenceManagerSource = _
+  
+  def pm : ScalaPersistenceManager = pmSource.pm
 }

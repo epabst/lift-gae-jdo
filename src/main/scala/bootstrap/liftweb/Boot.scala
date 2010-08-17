@@ -23,12 +23,9 @@ import provider._
 
 import com.jcraft.lift.model._
 
-import _root_.net.liftweb.mapper.{DB, ConnectionManager, Schemifier, DefaultConnectionIdentifier, ConnectionIdentifier}
-
-import _root_.java.sql.{Connection, DriverManager}
-import _root_.javax.servlet.http.{HttpServlet, HttpServletRequest , HttpServletResponse, HttpSession}
 import _root_.scala.actors._
-import Actor._
+import org.scala_libs.jdo.lift.RequestPersistenceManagerSource
+import javax.jdo.JDOHelper
 
 /**
  * A class that's instantiated early and run.  It allows the application
@@ -36,6 +33,7 @@ import Actor._
  */
 class Boot {
   def boot {
+    Model.pmSource = new RequestPersistenceManagerSource(JDOHelper.getPersistenceManager("transactions-optional"))
 
     LiftRules.addToPackages("com.jcraft.lift")
 

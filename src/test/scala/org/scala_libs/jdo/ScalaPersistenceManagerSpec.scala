@@ -2,8 +2,9 @@ package org.scala_libs.jdo
 
 import org.specs.SpecificationWithJUnit
 import com.google.appengine.tools.development.testing.{LocalServiceTestHelper, LocalDatastoreServiceTestConfig}
-import ModelForTesting.pm
 import test.model.SampleEntity
+import com.jcraft.lift.model.Model.pm
+import com.jcraft.lift.model.Model
 
 /**
  * Created by IntelliJ IDEA.
@@ -22,13 +23,13 @@ class ScalaPersistenceManagerSpec extends SpecificationWithJUnit {
     pm.makePersistent(entity)
     val entityId = entity.id
 
-    ModelForTesting.closePM
-    val persistedEntities = ModelForTesting.getObjectsById(classOf[SampleEntity], List(entityId))
+    Model.closePM
+    val persistedEntities = Model.getObjectsById(classOf[SampleEntity], List(entityId))
     persistedEntities.size must beEqual(1)
   }
 
   doAfter {
-    ModelForTesting.closePM
+    Model.closePM
     helper.tearDown
   }
 }
