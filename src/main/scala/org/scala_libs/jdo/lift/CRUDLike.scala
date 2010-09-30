@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package org.liftticket.liftticket.model
+/* NOTE: This file is MODIFIED from its original CRUDLike.scala content at http://github.com/dchenbecker/LiftTicket */
+package org.scala_libs.jdo.lift
 
 import scala.xml.{NodeSeq,Text}
 
@@ -278,8 +279,7 @@ trait CRUDOps[KeyType, MapperType <: KeyedMapper[KeyType,MapperType]] {
            "current" -> SHtml.hidden(() => currentObject(Full(current))),
            "fields" -> fieldMap(chooseTemplate("obj", "fields", xhtml), current, {_.editDisplay_?}, {_.toForm}),
            "ops" -> SHtml.submit(S.?("Save"), () => if (current.save) S.redirectTo(postSaveRedirectPath)),
-           "cancel" -> <input type="button" value={S.?("Cancel")} onclick="history.back();" />
-      )
+           "cancel" -> <input type="button" value={S.?("Cancel")} onclick="history.back();" />)
     }
     case _ => invalidInstanceTemplate
   }
@@ -293,8 +293,7 @@ trait CRUDOps[KeyType, MapperType <: KeyedMapper[KeyType,MapperType]] {
            "current" -> Text(S.?("Confirm deletion")),
            "fields" -> fieldMap(chooseTemplate("obj", "fields", xhtml), current, {_.viewDisplay_?}, {_.toViewHtml}),
            "ops" -> SHtml.submit(S.?("Delete"), {() => current.delete_!; S.redirectTo(postDeleteRedirectPath)}),
-           "cancel" -> <input type="button" value={S.?("Cancel")} onclick="history.back();" />
-      )
+           "cancel" -> <input type="button" value={S.?("Cancel")} onclick="history.back();" />)
     }
     case _ => invalidInstanceTemplate
   }
@@ -305,8 +304,7 @@ trait CRUDOps[KeyType, MapperType <: KeyedMapper[KeyType,MapperType]] {
            "current" -> Text(""),
            "fields" -> fieldMap(chooseTemplate("obj", "fields", xhtml), current, {_.viewDisplay_?}, {_.toViewHtml}),
            "ops" -> Text(""), // TODO: Put edit, delete ops here
-           "cancel" -> <input type="button" value={S.?("Back")} onclick="history.back();" />
-      )
+           "cancel" -> <input type="button" value={S.?("Back")} onclick="history.back();" />)
     }
     case _ => invalidInstanceTemplate
   } 
