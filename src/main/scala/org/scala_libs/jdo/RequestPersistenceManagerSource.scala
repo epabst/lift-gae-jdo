@@ -18,7 +18,6 @@ package org.scala_libs.jdo
 
 import net.liftweb.http.{S, RequestVar}
 import javax.jdo.PersistenceManagerFactory
-import org.scala_libs.jdo.{ScalaPersistenceManager, PersistenceManagerSource}
 
 class RequestPersistenceManagerSource(factory : => PersistenceManagerFactory) extends PersistenceManagerSource(factory) {
 
