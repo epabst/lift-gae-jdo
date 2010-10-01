@@ -14,13 +14,12 @@
  * and limitations under the License.
  */
 /* NOTE: This file is MODIFIED from its original CRUDLike.scala content at http://github.com/dchenbecker/LiftTicket */
-package org.scala_libs.jdo.lift
+package org.scala_libs.lift.crud
 
 import scala.xml.{NodeSeq,Text}
 
 import net.liftweb.common._
 import net.liftweb.http._
-import net.liftweb.mapper._
 import net.liftweb.sitemap._
 import net.liftweb.util._
 import Helpers._
@@ -46,15 +45,25 @@ object CRUDPermissions {
   def apply (accessAndView : Boolean) = new CRUDPermissions(accessAndView, accessAndView)
 }
 
+object Structurals {
+  /** This represents a Mapper, a Record, JDO object, or any other entity */
+  type Entity = {
+    def save(): Boolean
+
+    def delete_! : Boolean
+  }
+}
+
+import Structurals._
+
 /**
  * This trait is intended to be a flexible way to mix CRUD operations into
  * an existing MetaMapper. In addition to normal CRUD on the MetaMapper's 
  * defined fields, this allows you to create synthetic fields and simplifies
  * control over access to various functions.
  */
-trait CRUDOps[KeyType, MapperType <: KeyedMapper[KeyType,MapperType]] {
-  self : MapperType with KeyedMetaMapper[KeyType,MapperType] =>
-  
+trait BaseCRUDOps[EntityType <: Entity] {
+
   /**
    * This class encapsulates the CRUD control and generation info for a given
    * CRUD "field". This allows completely synthetic fields outside of the 
@@ -72,79 +81,50 @@ trait CRUDOps[KeyType, MapperType <: KeyedMapper[KeyType,MapperType]] {
               val editDisplay_? : Boolean,
               val viewDisplay_? : Boolean,
               val listDisplay_? : Boolean,
-              val toForm : MapperType => NodeSeq,
-              val toViewHtml : MapperType => NodeSeq,
-              val toListHtml : MapperType => NodeSeq)
+              val toForm : EntityType => NodeSeq,
+              val toViewHtml : EntityType => NodeSeq,
+              val toListHtml : EntityType => NodeSeq)
   
   /**
    * Appliers for Field to simplify definition
    */
   object Field {
     /** This method can be used as a NOOP for converter functions */
-    def noop(ignore : MapperType) : NodeSeq = Text("")
+    def noop(ignore : EntityType) : NodeSeq = Text("")
 
     /** Defines a display-only field that uses the same HTML for view and list */
     def apply(label : NodeSeq,
-              toHtml : MapperType => NodeSeq) =
+              toHtml : EntityType => NodeSeq) =
       new Field(label, false, true, true, noop, toHtml, toHtml)
     
     /** Defines a read-write field that uses the same HTML for view and list */
     def apply(label : NodeSeq,
               editDisplay_? : Boolean,
               viewDisplay_? : Boolean,
-              toForm : MapperType => NodeSeq,
-              toHtml : MapperType => NodeSeq) =
+              toForm : EntityType => NodeSeq,
+              toHtml : EntityType => NodeSeq) =
       new Field(label, editDisplay_?, viewDisplay_?, viewDisplay_?, toForm, toHtml, toHtml)
     
     def apply(label : NodeSeq,
               editDisplay_? : Boolean,
               viewDisplay_? : Boolean,
               listDisplay_? : Boolean,
-              toForm : MapperType => NodeSeq,
-              toViewHtml : MapperType => NodeSeq,
-              toListHtml : MapperType => NodeSeq) =
+              toForm : EntityType => NodeSeq,
+              toViewHtml : EntityType => NodeSeq,
+              toListHtml : EntityType => NodeSeq) =
       new Field(label, editDisplay_?, viewDisplay_?, listDisplay_?, toForm, toViewHtml, toListHtml)
   }
   
-  /** This calculates the fields for this CRUDOps to work with */
-  def calcFields : Seq[Field] = mappedFields.map(defaultField)
+  /** This calculates the fields for this BaseCRUDOps to work with */
+  def calcFields : Seq[Field]
   
-  /** The fields that this CRUDOps works with */
+  /** The fields that this BaseCRUDOps works with */
   private lazy val fields : Seq[Field] = calcFields
-  
-  /** A default generator for a field instance with control over view/edit/list 
-   */
-  def defaultField (field : BaseMappedField,
-                    edit : Boolean,
-                    view : Boolean,
-                    list : Boolean) : Field = {
-    val displayFunc = { 
-      instance : MapperType => (instance.fieldByName(field.name).map{mf : MappedField[_,MapperType] => mf.asHtml}) openOr Text("Could not generate form for " + field.name)                 
-    }
-    
-    Field(Text(field.displayName),
-          edit, view, list,
-          { instance => 
-            (instance.fieldByName(field.name).flatMap{mf : MappedField[_,MapperType] => mf.toForm}) openOr Text("Could not generate form for " + field.name)},
-          displayFunc,
-          displayFunc
-    )
-  }
 
-  
-  /**
-   * A default Field generator based on Mapper fields
-   */
-  def defaultField (field : BaseMappedField) : Field =
-    defaultField(field,
-                 field.dbIncludeInForm_?,
-                 field.dbDisplay_?,
-                 field.dbDisplay_?)
-    
   /** Define the user-friendly name for a single instance*/
   def instanceName : String
-  
-  /** Define the plural name. 
+
+  /** Define the plural name.
    *  TODO: Not sure how to I18N this properly */
   def pluralName : String = instanceName + "s"
   
@@ -182,7 +162,7 @@ trait CRUDOps[KeyType, MapperType <: KeyedMapper[KeyType,MapperType]] {
   lazy val crudDeletePath = deleteLoc.mkString("/", "/", "")
   
   // This request var maintains the current object being worked on
-  object currentObject extends RequestVar[Box[MapperType]](Empty)
+  object currentObject extends RequestVar[Box[EntityType]](Empty)
   
   /** What to wrap the various pages in. Typically this is just the surround
    * @param body What to wrap
@@ -212,13 +192,13 @@ trait CRUDOps[KeyType, MapperType <: KeyedMapper[KeyType,MapperType]] {
     </lift:edit>
     
   def viewTemplate : NodeSeq = formTemplate
-    
+
   /**
-   * This method may be overridden to control which instances are shown in 
+   * This method may be overridden to control which instances are shown in
    * the list view.
    */
-  def getListInstances : List[MapperType] = findAll
-    
+  def getListInstances : List[EntityType]
+
   def list (xhtml : NodeSeq) : NodeSeq = {
     val listFields = fields.filter(_.listDisplay_?)
     
@@ -259,9 +239,9 @@ trait CRUDOps[KeyType, MapperType <: KeyedMapper[KeyType,MapperType]] {
    * bound markup.
    */
   private def fieldMap(template : NodeSeq,
-                       instance : MapperType, 
+                       instance : EntityType,
                        predicate : Field => Boolean, 
-                       generator : Field => (MapperType => NodeSeq)) : NodeSeq = {
+                       generator : Field => (EntityType => NodeSeq)) : NodeSeq = {
     fields.filter(predicate).flatMap({ field =>
       bind("field", template, "label" -> field.label, "entry" -> generator(field)(instance))
     })
@@ -361,6 +341,11 @@ trait CRUDOps[KeyType, MapperType <: KeyedMapper[KeyType,MapperType]] {
     Menu(listLocItem)
   }
  
+  /**
+   * Create a new model in the datastore
+   */
+  def create : EntityType
+
   // This is used to link to the create menu item as needed
   private lazy val createMenuName = "create" + instanceName
   
@@ -376,7 +361,7 @@ trait CRUDOps[KeyType, MapperType <: KeyedMapper[KeyType,MapperType]] {
       val link = Link(createLoc, false, crudCreatePath)
       override def params = 
         Template({() => 
-          currentObject(Full(getSingleton.create)) ; pageWrap(formTemplate)
+          currentObject(Full(create)) ; pageWrap(formTemplate)
         }) ::
         Snippet("edit", edit) :: 
         If(() => checkAccess(CrudOperations.Create), noPermissionsMessage(CrudOperations.Create)) :: Nil
