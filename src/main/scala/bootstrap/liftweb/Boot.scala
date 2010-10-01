@@ -66,8 +66,7 @@ object MenuInfo {
 
   def menu: List[Menu] =  
        Menu(Loc("Home", "index" :: Nil, "Home")) ::
-       Menu(Loc("Authors", List("authors", "list"), "Author List")) ::
-       Menu(Loc("Add Authors", List("authors", "add"), "Add Author", Hidden)) ::
+       Author.menus :::
        Menu(Loc("Books", List("books", "list"), "Book List")) ::
        Menu(Loc("Add Books", List("books", "add"), "Add Book", Hidden)) ::
        Menu(Loc("Book Search", List("books", "search"), "Book Search")) ::
