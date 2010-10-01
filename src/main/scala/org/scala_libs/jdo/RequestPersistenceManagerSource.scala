@@ -14,7 +14,7 @@
  * and limitations under the License.
  */
 
-package org.scala_libs.jdo.lift
+package org.scala_libs.jdo
 
 import net.liftweb.http.{S, RequestVar}
 import javax.jdo.PersistenceManagerFactory

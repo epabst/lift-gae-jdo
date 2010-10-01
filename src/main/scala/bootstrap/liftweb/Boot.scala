@@ -24,7 +24,7 @@ import provider._
 import com.jcraft.lift.model._
 
 import _root_.scala.actors._
-import org.scala_libs.jdo.lift.RequestPersistenceManagerSource
+import org.scala_libs.jdo.RequestPersistenceManagerSource
 import javax.jdo.JDOHelper
 
 /**
