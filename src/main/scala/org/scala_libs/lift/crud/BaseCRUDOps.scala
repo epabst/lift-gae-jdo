@@ -45,24 +45,13 @@ object CRUDPermissions {
   def apply (accessAndView : Boolean) = new CRUDPermissions(accessAndView, accessAndView)
 }
 
-object Structurals {
-  /** This represents a Mapper, a Record, JDO object, or any other entity */
-  type Entity = {
-    def save(): Boolean
-
-    def delete_! : Boolean
-  }
-}
-
-import Structurals._
-
 /**
  * This trait is intended to be a flexible way to mix CRUD operations into
- * an existing MetaMapper. In addition to normal CRUD on the MetaMapper's 
- * defined fields, this allows you to create synthetic fields and simplifies
+ * an existing MetaMapper or other similar type of object.
+ * This allows you to wrap existing or create synthetic fields and simplifies
  * control over access to various functions.
  */
-trait BaseCRUDOps[EntityType <: Entity] {
+trait BaseCRUDOps[EntityType] {
 
   /**
    * This class encapsulates the CRUD control and generation info for a given
@@ -253,12 +242,14 @@ trait BaseCRUDOps[EntityType <: Entity] {
   /** Controls where to go after an edit/create */
   def postSaveRedirectPath = crudListPath
   
+  def save(toSave: EntityType): Boolean
+
   def edit (xhtml : NodeSeq) : NodeSeq = currentObject.is match {
     case Full(current) => {
       bind("obj", xhtml,
            "current" -> SHtml.hidden(() => currentObject(Full(current))),
            "fields" -> fieldMap(chooseTemplate("obj", "fields", xhtml), current, {_.editDisplay_?}, {_.toForm}),
-           "ops" -> SHtml.submit(S.?("Save"), () => if (current.save) S.redirectTo(postSaveRedirectPath)),
+           "ops" -> SHtml.submit(S.?("Save"), () => if (save(current)) S.redirectTo(postSaveRedirectPath)),
            "cancel" -> <input type="button" value={S.?("Cancel")} onclick="history.back();" />)
     }
     case _ => invalidInstanceTemplate
@@ -267,12 +258,14 @@ trait BaseCRUDOps[EntityType <: Entity] {
   /** Controls where to go after an edit/create */
   def postDeleteRedirectPath = crudListPath
   
+  def delete_!(toDelete : EntityType): Boolean
+
   def delete (xhtml : NodeSeq) : NodeSeq = currentObject.is match {
     case Full(current) => {
       bind("obj", xhtml,
            "current" -> Text(S.?("Confirm deletion")),
            "fields" -> fieldMap(chooseTemplate("obj", "fields", xhtml), current, {_.viewDisplay_?}, {_.toViewHtml}),
-           "ops" -> SHtml.submit(S.?("Delete"), {() => current.delete_!; S.redirectTo(postDeleteRedirectPath)}),
+           "ops" -> SHtml.submit(S.?("Delete"), {() => delete_!(current); S.redirectTo(postDeleteRedirectPath)}),
            "cancel" -> <input type="button" value={S.?("Cancel")} onclick="history.back();" />)
     }
     case _ => invalidInstanceTemplate

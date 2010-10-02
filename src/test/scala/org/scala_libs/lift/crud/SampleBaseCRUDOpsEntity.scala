@@ -7,19 +7,6 @@ import net.liftweb.common.{Full, Empty}
 class SampleBaseCRUDOpsEntity(var name: Option[String], var age: Option[Int]) {
   private var savedName = name
   private var savedAge = age
-
-  def save() : Boolean = {
-    savedName = name
-    savedAge = age
-    true
-  }
-
-  def delete_! : Boolean = {
-    savedName = Empty
-    savedAge = Empty
-    SampleBaseCRUDOpsEntity.instances -= this
-    true
-  }
 }
 
 object SampleBaseCRUDOpsEntity extends BaseCRUDOps[SampleBaseCRUDOpsEntity] {
@@ -32,6 +19,19 @@ object SampleBaseCRUDOpsEntity extends BaseCRUDOps[SampleBaseCRUDOpsEntity] {
   }
 
   def getListInstances = instances
+
+  def save(entity: SampleBaseCRUDOpsEntity) : Boolean = {
+    entity.savedName = entity.name
+    entity.savedAge = entity.age
+    true
+  }
+
+  def delete_!(entity: SampleBaseCRUDOpsEntity) : Boolean = {
+    entity.savedName = Empty
+    entity.savedAge = Empty
+    SampleBaseCRUDOpsEntity.instances -= entity
+    true
+  }
 
   def instanceName = "Entity"
 
