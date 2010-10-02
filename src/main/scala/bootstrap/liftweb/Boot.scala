@@ -23,9 +23,8 @@ import provider._
 
 import com.jcraft.lift.model._
 
-import _root_.scala.actors._
-import org.scala_libs.jdo.RequestPersistenceManagerSource
 import javax.jdo.JDOHelper
+import org.scala_libs.jdo.{JdoConfig, RequestPersistenceManagerSource}
 
 /**
  * A class that's instantiated early and run.  It allows the application
@@ -33,7 +32,7 @@ import javax.jdo.JDOHelper
  */
 class Boot {
   def boot {
-    Model.pmSource = new RequestPersistenceManagerSource(JDOHelper.getPersistenceManagerFactory("transactions-optional"))
+    JdoConfig.defaultPmSource = new RequestPersistenceManagerSource(JDOHelper.getPersistenceManagerFactory("transactions-optional"))
 
     LiftRules.addToPackages("com.jcraft.lift")
 

@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions
  * and limitations under the License.
  */
-package com.jcraft.lift.model
+package org.scala_libs.jdo
 
-import _root_.org.scala_libs.jdo._
-
-object Model {
+object JdoConfig {
   /**
    * Should be set before using.  Bootstrap is the recommended location.
    */
-  var pmSource : PersistenceManagerSource = _
+  var defaultPmSource : PersistenceManagerSource = _
   
-  def pm : ScalaPersistenceManager = { pmSource.pm }
-  def closePM = pmSource.closePM
+  def pm : ScalaPersistenceManager = { defaultPmSource.pm }
+  def closePM = defaultPmSource.closePM
 }

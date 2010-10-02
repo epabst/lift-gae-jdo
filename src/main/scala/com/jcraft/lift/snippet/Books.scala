@@ -25,7 +25,7 @@ import Helpers._
 import S._
 
 import _root_.com.jcraft.lift.model._
-import _root_.com.jcraft.lift.model.Model._
+import _root_.org.scala_libs.jdo.JdoConfig._
 import _root_.com.google.appengine.api.datastore.Key
 import _root_.com.google.appengine.api.datastore.KeyFactory._
 import _root_.javax.jdo.JDOUserException

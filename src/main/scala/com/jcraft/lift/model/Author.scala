@@ -16,12 +16,11 @@
 package com.jcraft.lift.model
 import javax.jdo.annotations._
 import com.google.appengine.api.datastore.Key
-import org.scala_libs.lift.crud.BaseCRUDOps
 import net.liftweb.http.SHtml
 import xml.Text
 import com.jcraft.lift.snippet.BookOps
 import org.scala_libs.jdo.criterion.eqC
-import Model.pm
+import org.scala_libs.lift.crud.jdo.JdoCRUDOps
 
 /**
   An author is someone who writes books.
@@ -42,17 +41,13 @@ class Author {
   var books : java.util.List[Book] = new java.util.LinkedList[Book]
 
   def findBooks = {
-    pm.from(classOf[Book]).where(eqC("author", this)).resultList
+    Author.pm.from(classOf[Book]).where(eqC("author", this)).resultList
   }
 }
 
-object Author extends BaseCRUDOps[Author] {
+object Author extends JdoCRUDOps[Author] {
   def instanceName = "Author"
-  def create() = new Author
-  def save(author: Author) : Boolean = { pm.makePersistent(author); true }
-  def delete_!(author: Author) : Boolean = { pm.deletePersistent(author); true }
-  def findAll = pm.from(classOf[Author]).resultList
-  def getListInstances = findAll
+  val entityClass = classOf[Author]
 
   def calcFields = Seq(Field(Text("Name"), true, true, (author : Author) => SHtml.text(author.name,  author.name=_ ), (author: Author) => Text(author.name)),
     Field(Text("Books published"), false, true, _ => Nil, (author: Author) => SHtml.link("/books/search", () => BookOps.resultVar(author.findBooks), Text(author.books.size.toString))))

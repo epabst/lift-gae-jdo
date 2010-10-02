@@ -1,10 +1,9 @@
 package org.scala_libs.jdo
 
+import org.scala_libs.jdo.JdoConfig._
 import org.specs.SpecificationWithJUnit
 import com.google.appengine.tools.development.testing.{LocalServiceTestHelper, LocalDatastoreServiceTestConfig}
 import test.model.SampleEntity
-import com.jcraft.lift.model.Model.pm
-import com.jcraft.lift.model.Model
 import javax.jdo.JDOHelper
 
 /**
@@ -17,7 +16,7 @@ import javax.jdo.JDOHelper
 
 class ScalaPersistenceManagerSpec extends SpecificationWithJUnit {
   val helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
-  Model.pmSource = new PersistenceManagerSource(JDOHelper.getPersistenceManagerFactory("transactions-optional")) {
+  defaultPmSource = new PersistenceManagerSource(JDOHelper.getPersistenceManagerFactory("transactions-optional")) {
     private var _pm = openPM
     def pm : ScalaPersistenceManager = _pm
     def removePM() = {_pm = openPM}
@@ -29,13 +28,13 @@ class ScalaPersistenceManagerSpec extends SpecificationWithJUnit {
     pm.makePersistent(entity)
     val entityId = entity.id
 
-    Model.closePM
+    closePM
     val persistedEntities = pm.getObjectsById(classOf[SampleEntity], List(entityId))
     persistedEntities.size must beEqual(1)
   }
 
   doAfter {
-    Model.closePM
+    closePM
     helper.tearDown
   }
 }
