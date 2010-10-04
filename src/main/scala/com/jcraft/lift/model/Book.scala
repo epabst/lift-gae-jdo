@@ -48,7 +48,7 @@ class Book {
   var author : Author = _
 }
 
-object Book extends JdoCRUDOps[Book] {
+object Book extends JdoCRUDOps[Key,Book] {
   def instanceName = "Book"
   val entityClass = classOf[Book]
 
@@ -79,10 +79,8 @@ object Book extends JdoCRUDOps[Book] {
   def authorFieldForForm(book: Book) = {
     val choices = Author.findAll.map(author => (keyToString(author.id) -> author.name)).toList
     val default = Box.legacyNullTest(book.author).map(author => keyToString(author.id))
-    select(choices, default, (id) => if(book.author==null) book.author = findAuthorById(stringToKey(id)).getOrElse(null))
+    select(choices, default, (id) => if(book.author==null) book.author = Author.findById(stringToKey(id)).getOrElse(null))
   }
-
-  def findAuthorById(id:Key):Box[Author] = pm.getObjectById[Author](classOf[Author], id)
 
   override def pageWrap(body: NodeSeq) = <lift:surround with="defaultWithDatePicker" at="content">{ body }</lift:surround>
 }

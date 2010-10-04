@@ -60,7 +60,7 @@ class BookOps {
     var title = ""
 
     def doSearch () = {
-      val l = pm.from(classOf[Book])
+      val l = Book.query
             .where(geC("title", title),
                    ltC("title", title+"\ufffd"))
             .resultList

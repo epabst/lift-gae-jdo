@@ -41,11 +41,11 @@ class Author {
   var books : java.util.List[Book] = new java.util.LinkedList[Book]
 
   def findBooks = {
-    Author.pm.from(classOf[Book]).where(eqC("author", this)).resultList
+    Book.query.where(eqC("author", this)).resultList
   }
 }
 
-object Author extends JdoCRUDOps[Author] {
+object Author extends JdoCRUDOps[Key,Author] {
   def instanceName = "Author"
   val entityClass = classOf[Author]
 
