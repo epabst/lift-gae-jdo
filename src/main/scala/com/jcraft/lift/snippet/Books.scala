@@ -15,21 +15,14 @@
  */
 package com.jcraft.lift.snippet
 
-import _root_.java.text.ParseException
 import _root_.scala.xml.{NodeSeq,Text}
 import _root_.net.liftweb.http.{RequestVar,S,SHtml}
-import _root_.net.liftweb.common._
-import _root_.net.liftweb.util._
 import _root_.net.liftweb.util.Helpers
 import Helpers._
 import S._
 
 import _root_.com.jcraft.lift.model._
 import _root_.org.scala_libs.jdo.JdoConfig._
-import _root_.com.google.appengine.api.datastore.Key
-import _root_.com.google.appengine.api.datastore.KeyFactory._
-import _root_.javax.jdo.JDOUserException
-
 import _root_.org.scala_libs.jdo.criterion._
 
 object BookOps {
@@ -38,23 +31,6 @@ object BookOps {
 
 class BookOps {
   val formatter = new java.text.SimpleDateFormat("yyyyMMdd")
-
-  def list (xhtml : NodeSeq) : NodeSeq = {
-    val books = pm.from(classOf[Book]).resultList
-
-    books.flatMap(book =>
-      bind("book", xhtml,
-           "title" -> Text(book.title),
-           "published" -> Text(formatter.format(book.published)),
-           "genre" -> Text(if(book.genre != null) book.genre.toString else ""),
-           "author" -> Text(book.author.name),
-           "edit" -> SHtml.link("add.html", 
-                                () => bookVar(book), 
-                                Text(?("Edit"))),
-           "delete" -> SHtml.link("list.html", 
-                                () => pm.deletePersistent(book),
-                                Text(?("Delete")))))
-  }
 
   object bookVar extends RequestVar[Book](new Book)
   lazy val book = bookVar.is
@@ -74,69 +50,7 @@ class BookOps {
         ).forall(_ == true)
   }
 
-  def setDate (input : String, toSet : Book) {
-    try { toSet.published=formatter.parse(input) } 
-    catch { case pe : ParseException => S.error("Error parsing the date") }
-  }
-
-  def findAuthor(a:Author):Author = findAuthorById(a.id)
-  def findAuthorById(id:String):Author = findAuthorById(stringToKey(id))
-  def findAuthorById(id:Key):Author = {
-    pm.getObjectById[Author](classOf[Author], id).getOrElse(null)
-  }
-
-  def add (xhtml : NodeSeq) : NodeSeq = {
-
-    def doAdd () = 
-      if (is_valid_Book_?(book)) {
-        try{
-          book.id match {
-            case null =>
-              book.author.books.add(book)
-              pm.makePersistent(book.author)
-            case _ =>
-              pm.makePersistent(book)
-          }
-          redirectTo("list")
-        } 
-        catch {
-	  case pe : JDOUserException => 
-            error("Error adding book"); Log.error("Book add failed", pe)
-        }
-      }
-
-    lazy val current = book
-
-    val authors = pm.from(classOf[Author]).resultList
-
-    val choices = authors.map(author => 
-      (keyToString(author.id) -> author.name)).toList
-    val default = 
-       if (book.author != null) { Full(keyToString(book.author.id)) } 
-       else { Empty }
-
-    def find(n:String):Author = {
-       val l = for(a<-authors if a.id.toString==n) yield  a
-      l(0)
-    }
-
-    import SHtml.{hidden, text, select, submit}
-    bind("book", xhtml,
-         "id" -> hidden(() => bookVar(current)),
-         "title" -> text(book.title, book.title=_),
-         "published" -> text(formatter.format(book.published), 
-                                   setDate(_, book)) % ("id" -> "published"),
-         "genre" -> select(Genre.getNameDescriptionList, 
-                           (Box.legacyNullTest(book.genre).map(_.toString) or Full("")), 
-                           choice => book.genre = Genre.valueOf(choice).getOrElse("").toString),
-         "author" -> select(choices, 
-                            default, 
-                            (id) => if(book.author==null)
-                                      book.author=findAuthorById(id)),
-         "save" -> submit(?("Save"), doAdd))
-  }
-
-  def searchResults (xhtml : NodeSeq) : NodeSeq = 
+  def searchResults (xhtml : NodeSeq) : NodeSeq =
     BookOps.resultVar.is.flatMap(result =>
       bind("result", xhtml, 
            "title" -> Text(result.title), 
