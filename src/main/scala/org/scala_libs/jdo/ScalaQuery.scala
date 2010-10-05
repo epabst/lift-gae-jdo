@@ -38,7 +38,7 @@ class ScalaQuery[A](javaPM:PersistenceManager, val clss:Class[A]){
   private var rangeIndex:Option[(Long, Long)] = None
   private var _timeoutMillis:Option[Int] = None
 
-  def resultList() = {
+  def resultList(): List[A] = {
     val q = newQuery
     convertList[A](q.executeWithArray(parameters:_*).asInstanceOf[JList[A]]).toList
   }
