@@ -203,13 +203,13 @@ trait BaseCRUDOps[EntityType] {
            <tr>{
              listFields.flatMap { field => <td>{field.toListHtml(instance)}</td>} ++
              (if (checkView(CrudOperations.View)) {
-               <td>{SHtml.link(crudViewPath, {() => currentObject(Full(instance))}, Text(S.?("View")))}</td>
+               <td>{SHtml.link(crudViewPath, {() => useObjectFromPriorRequest(instance)}, Text(S.?("View")))}</td>
              } else Text("")) ++
              (if (checkView(CrudOperations.Edit)) {
-               <td>{SHtml.link(crudEditPath, {() => currentObject(Full(instance))}, Text(S.?("Edit")))}</td>
+               <td>{SHtml.link(crudEditPath, {() => useObjectFromPriorRequest(instance)}, Text(S.?("Edit")))}</td>
              } else Text("")) ++
              (if (checkView(CrudOperations.Delete)) {
-               <td>{SHtml.link(crudDeletePath, {() => currentObject(Full(instance))}, Text(S.?("Delete")))}</td>
+               <td>{SHtml.link(crudDeletePath, {() => useObjectFromPriorRequest(instance)}, Text(S.?("Delete")))}</td>
              } else Text(""))
            }</tr>
          },
@@ -244,10 +244,12 @@ trait BaseCRUDOps[EntityType] {
   
   def save(toSave: EntityType): Boolean
 
+  def useObjectFromPriorRequest(entity: EntityType) = currentObject(Full(entity))
+
   def edit (xhtml : NodeSeq) : NodeSeq = currentObject.is match {
     case Full(current) => {
       bind("obj", xhtml,
-           "current" -> SHtml.hidden(() => currentObject(Full(current))),
+           "current" -> SHtml.hidden(() => useObjectFromPriorRequest(current)),
            "fields" -> fieldMap(chooseTemplate("obj", "fields", xhtml), current, {_.editDisplay_?}, {_.toForm}),
            "ops" -> SHtml.submit(S.?("Save"), () => if (save(current)) S.redirectTo(postSaveRedirectPath)),
            "cancel" -> <input type="button" value={S.?("Cancel")} onclick="history.back();" />)
@@ -373,11 +375,11 @@ trait BaseCRUDOps[EntityType] {
               If(() => checkAccess(CrudOperations.View), noPermissionsMessage(CrudOperations.View)) ::                     
               Hidden :: Nil) : _*))
   }
-  
+
   private def editMenu : Menu = {
     import Loc._
     Menu(Loc("edit" + instanceName, editLoc, S.?("Edit " + instanceName),
-             (Template(() => pageWrap(formTemplate)) :: Snippet("edit", edit) :: 
+             (Template(() => pageWrap(formTemplate)) :: Snippet("edit", edit) ::
               If(() => checkAccess(CrudOperations.Edit), noPermissionsMessage(CrudOperations.Edit)) ::
               Hidden :: Nil) : _*))
   }
