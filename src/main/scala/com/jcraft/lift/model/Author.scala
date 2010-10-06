@@ -20,7 +20,7 @@ import net.liftweb.http.SHtml
 import xml.Text
 import com.jcraft.lift.snippet.BookOps
 import org.scala_libs.jdo.criterion.eqC
-import org.scala_libs.lift.crud.jdo.JdoCRUDOps
+import org.scala_libs.lift.crud.jdo.GaeCRUDOps
 
 /**
   An author is someone who writes books.
@@ -45,7 +45,7 @@ class Author {
   }
 }
 
-object Author extends JdoCRUDOps[Key,Author] {
+object Author extends GaeCRUDOps[Author] {
   def instanceName = "Author"
   val entityClass = classOf[Author]
 

@@ -16,16 +16,15 @@
 
 package com.jcraft.lift.model
 
-import _root_.com.google.appengine.api.datastore.Key
-import _root_.com.google.appengine.api.datastore.KeyFactory._
-
 import java.util.Date
 import javax.jdo.annotations._
-import org.scala_libs.lift.crud.jdo.JdoCRUDOps
 import java.text.ParseException
 import net.liftweb.http.{S, SHtml}
 import net.liftweb.common.{Full, Box}
 import xml.{NodeSeq, Text, UnprefixedAttribute, Null}
+import com.google.appengine.api.datastore.Key
+import org.scala_libs.lift.crud.jdo.GaeCRUDOps
+import org.scala_libs.lift.crud.KeyedCRUDOps.foreignSelect
 
 @PersistenceCapable{val identityType = IdentityType.APPLICATION,
                     val detachable="true"}
@@ -48,7 +47,7 @@ class Book {
   var author : Author = _
 }
 
-object Book extends JdoCRUDOps[Key,Book] {
+object Book extends GaeCRUDOps[Book] {
   def instanceName = "Book"
   val entityClass = classOf[Book]
 
@@ -75,11 +74,8 @@ object Book extends JdoCRUDOps[Key,Book] {
         (book: Book) => Text(if(book.genre != null) book.genre.toString else "")),
       Field(Text("Author"), true, true, authorFieldForForm, (book: Book) => Text(book.author.name)))
   }
-
   def authorFieldForForm(book: Book): NodeSeq = {
-    val choices = Author.findAll.map(author => (keyToString(author.id) -> author.name))
-    val default = Box.legacyNullTest(book.author).map(author => keyToString(author.id))
-    if(book.author==null) { select(choices, default, (id) => book.author = Author.findById(stringToKey(id)).getOrElse(null)) } else Text(book.author.name)
+    if (book.author == null) foreignSelect(Author, Box.legacyNullTest(book.author), (a:Author) => a.id, (a:Author) => a.name, (author: Box[Author]) => book.author = author.getOrElse(null)) else Text(book.author.name)
   }
 
   override def pageWrap(body: NodeSeq) = <lift:surround with="defaultWithDatePicker" at="content">{ body }</lift:surround>

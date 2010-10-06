@@ -1,15 +1,16 @@
 package org.scala_libs.lift.crud.jdo
 
 import org.scala_libs.jdo.{JdoConfig, ScalaPersistenceManager}
-import org.scala_libs.lift.crud.BaseCRUDOps
 import org.apache.log4j.Logger
+import net.liftweb.common.Box
+import org.scala_libs.lift.crud.KeyedCRUDOps
 
 /**
  * A CRUDOps for a JDO entity.
  * @author epabst@gmail.com
  */
 
-trait JdoCRUDOps[IdType <: Object,Entity <: Any] extends BaseCRUDOps[Entity] {
+trait JdoCRUDOps[IdType <: Object,Entity <: Any] extends KeyedCRUDOps[IdType,Entity] {
   private val logger = new net.liftweb.util.Log4JLogger(Logger.getLogger("org.scala_libs.lift.crud.jdo.JdoCRUDOps"))
   /** entityClass is needed for the default implementations of create and findAll */
   val entityClass: Class[Entity]
@@ -18,7 +19,7 @@ trait JdoCRUDOps[IdType <: Object,Entity <: Any] extends BaseCRUDOps[Entity] {
   def save(entity: Entity) : Boolean = { logger.debug("saving " + entity); pm.makePersistent(entity); true }
   def delete_!(entity: Entity) : Boolean = { logger.debug("deleting " + entity); pm.deletePersistent(entity); true }
   def query = pm.from(entityClass)
-  def findById(id: IdType): Option[Entity] = { val entity = pm.getObjectById[Entity](entityClass, id); logger.debug("findById returned " + entity); entity }
+  def findByKey(id: IdType): Box[Entity] = { val entity: Box[Entity] = pm.getObjectById[Entity](entityClass, id); logger.debug("findByKey returned " + entity); entity }
   def findAll = { val results = query.resultList; logger.debug("findAll returned " + results); results }
   def getListInstances = findAll
 

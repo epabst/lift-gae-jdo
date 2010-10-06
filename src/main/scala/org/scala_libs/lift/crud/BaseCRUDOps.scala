@@ -23,6 +23,7 @@ import net.liftweb.http._
 import net.liftweb.sitemap._
 import net.liftweb.util._
 import Helpers._
+import org.apache.log4j.Logger
 
 /** This enumeration defines the possible operations for CRUD */
 object CrudOperations extends Enumeration {
@@ -393,4 +394,32 @@ trait BaseCRUDOps[EntityType] {
   }
   
   def menus : List[Menu] = List(deleteMenu, editMenu, viewMenu, listMenu, createMenu)
+}
+
+object BaseCRUDOps {
+  val logger = new net.liftweb.util.Log4JLogger(Logger.getLogger("org.scala_libs.lift.crud.BaseCRUDOps"))
+}
+
+trait KeyedCRUDOps[KeyType,Entity <: Any] extends BaseCRUDOps[Entity] {
+  def findByKey(key: KeyType): Box[Entity]
+
+  def stringToKey(keyString: String): KeyType = keyString.asInstanceOf[KeyType]
+  def keyToString(key: KeyType): String = key.toString
+}
+object KeyedCRUDOps {
+  def foreignSelect[FK,T](foreignCrud: KeyedCRUDOps[FK,T], default: Box[T], id: (T) => FK, displayText: (T) => String, react: (Box[T]) => Any): NodeSeq = {
+    foreignSelect(foreignCrud.getListInstances, default, foreignCrud, id, displayText, react)
+  }
+
+  import SHtml.select
+  def foreignSelect[FK,T](selectable: List[T], default: Box[T], foreignCrud: KeyedCRUDOps[FK,T], 
+                          id: (T) => FK, displayText: (T) => String, react: (Box[T]) => Any): NodeSeq = {
+    val choices = selectable.map(foreign => (foreignCrud.keyToString(id(foreign)) -> displayText(foreign)))
+    select(choices, default.map(foreign => foreignCrud.keyToString(id(foreign))), keyString => react(findByKeyString(keyString, foreignCrud)))
+  }
+  private def findByKeyString[FK,T](keyString: String, foreignCrud: KeyedCRUDOps[FK,T]): Box[T] = {
+    val key = foreignCrud.stringToKey(keyString)
+    BaseCRUDOps.logger.debug("findByKeyString converted " + keyString + " into " + key + " of type " + key.asInstanceOf[Object].getClass)
+    foreignCrud.findByKey(key)
+  }
 }
