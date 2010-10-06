@@ -405,21 +405,18 @@ trait KeyedCRUDOps[KeyType,Entity <: Any] extends BaseCRUDOps[Entity] {
 
   def stringToKey(keyString: String): KeyType = keyString.asInstanceOf[KeyType]
   def keyToString(key: KeyType): String = key.toString
-}
-object KeyedCRUDOps {
-  def foreignSelect[FK,T](foreignCrud: KeyedCRUDOps[FK,T], default: Box[T], id: (T) => FK, displayText: (T) => String, react: (Box[T]) => Any): NodeSeq = {
-    foreignSelect(foreignCrud.getListInstances, default, foreignCrud, id, displayText, react)
-  }
 
-  import SHtml.select
-  def foreignSelect[FK,T](selectable: List[T], default: Box[T], foreignCrud: KeyedCRUDOps[FK,T], 
-                          id: (T) => FK, displayText: (T) => String, react: (Box[T]) => Any): NodeSeq = {
-    val choices = selectable.map(foreign => (foreignCrud.keyToString(id(foreign)) -> displayText(foreign)))
-    select(choices, default.map(foreign => foreignCrud.keyToString(id(foreign))), keyString => react(findByKeyString(keyString, foreignCrud)))
+  def selectEntity(default: Box[Entity], id: (Entity) => KeyType, displayText: (Entity) => String, react: (Box[Entity]) => Any): NodeSeq = {
+    selectEntity(getListInstances, default, id, displayText, react)
   }
-  private def findByKeyString[FK,T](keyString: String, foreignCrud: KeyedCRUDOps[FK,T]): Box[T] = {
-    val key = foreignCrud.stringToKey(keyString)
+  import SHtml.select
+  def selectEntity(selectable: List[Entity], default: Box[Entity], id: (Entity) => KeyType, displayText: (Entity) => String, react: (Box[Entity]) => Any): NodeSeq = {
+    val choices = selectable.map(entity => (keyToString(id(entity)) -> displayText(entity)))
+    select(choices, default.map(entity => keyToString(id(entity))), keyString => react(findByKeyString(keyString)))
+  }
+  private def findByKeyString(keyString: String): Box[Entity] = {
+    val key = stringToKey(keyString)
     BaseCRUDOps.logger.debug("findByKeyString converted " + keyString + " into " + key + " of type " + key.asInstanceOf[Object].getClass)
-    foreignCrud.findByKey(key)
+    findByKey(key)
   }
 }

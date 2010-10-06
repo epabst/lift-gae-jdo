@@ -24,7 +24,6 @@ import net.liftweb.common.{Full, Box}
 import xml.{NodeSeq, Text, UnprefixedAttribute, Null}
 import com.google.appengine.api.datastore.Key
 import org.scala_libs.lift.crud.jdo.GaeCRUDOps
-import org.scala_libs.lift.crud.KeyedCRUDOps.foreignSelect
 
 @PersistenceCapable{val identityType = IdentityType.APPLICATION,
                     val detachable="true"}
@@ -75,7 +74,10 @@ object Book extends GaeCRUDOps[Book] {
       Field(Text("Author"), true, true, authorFieldForForm, (book: Book) => Text(book.author.name)))
   }
   def authorFieldForForm(book: Book): NodeSeq = {
-    if (book.author == null) foreignSelect(Author, Box.legacyNullTest(book.author), (a:Author) => a.id, (a:Author) => a.name, (author: Box[Author]) => book.author = author.getOrElse(null)) else Text(book.author.name)
+    if (book.author == null) {
+      Author.selectEntity(Box.legacyNullTest(book.author), _.id, _.name, 
+        (author: Box[Author]) => book.author = author.getOrElse(null))
+    } else Text(book.author.name)
   }
 
   override def pageWrap(body: NodeSeq) = <lift:surround with="defaultWithDatePicker" at="content">{ body }</lift:surround>
