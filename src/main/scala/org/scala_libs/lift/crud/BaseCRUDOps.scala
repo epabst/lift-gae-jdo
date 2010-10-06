@@ -407,16 +407,17 @@ trait KeyedCRUDOps[KeyType,Entity <: Any] extends BaseCRUDOps[Entity] {
   def keyToString(key: KeyType): String = key.toString
 
   def selectEntity(default: Box[Entity], id: (Entity) => KeyType, displayText: (Entity) => String, react: (Box[Entity]) => Any): NodeSeq = {
-    selectEntity(getListInstances, default, id, displayText, react)
+    selectEntityId(default.map(id), id, displayText, id => react(findByKey(id)))
+  }
+  def selectEntityId(defaultId: Box[KeyType], id: (Entity) => KeyType, displayText: (Entity) => String, react: (KeyType) => Any): NodeSeq = {
+    selectEntityId(getListInstances, defaultId, id, displayText, react)
   }
   import SHtml.select
   def selectEntity(selectable: List[Entity], default: Box[Entity], id: (Entity) => KeyType, displayText: (Entity) => String, react: (Box[Entity]) => Any): NodeSeq = {
-    val choices = selectable.map(entity => (keyToString(id(entity)) -> displayText(entity)))
-    select(choices, default.map(entity => keyToString(id(entity))), keyString => react(findByKeyString(keyString)))
+    selectEntityId(selectable, default.map(id), id, displayText, id => react(findByKey(id)))
   }
-  private def findByKeyString(keyString: String): Box[Entity] = {
-    val key = stringToKey(keyString)
-    BaseCRUDOps.logger.debug("findByKeyString converted " + keyString + " into " + key + " of type " + key.asInstanceOf[Object].getClass)
-    findByKey(key)
+  def selectEntityId(selectable: List[Entity], defaultId: Box[KeyType], id: (Entity) => KeyType, displayText: (Entity) => String, react: (KeyType) => Any): NodeSeq = {
+    val choices = selectable.map(entity => (keyToString(id(entity)) -> displayText(entity)))
+    select(choices, defaultId.map(keyToString), keyString => react(stringToKey(keyString)))
   }
 }

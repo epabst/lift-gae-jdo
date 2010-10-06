@@ -13,14 +13,32 @@ import net.liftweb.util.StringHelpers
 
 class KeyedCRUDOpsSpec extends SpecificationWithJUnit {
   val session : LiftSession = new LiftSession("", StringHelpers.randomString(20), Empty)
+  val pet1 = Pet.create(); pet1.name = Full("Spot")
+  val pet2 = Pet.create(); pet2.name = Full("Fluffy")
+  Pet.save(pet1)
+  Pet.save(pet2)
 
-  "it should handle select" in {
-    val pet1 = Pet.create(); pet1.name = Full("Spot")
-    val pet2 = Pet.create(); pet2.name = Full("Fluffy")
-    Pet.save(pet1)
-    Pet.save(pet2)
+  "it should handle selectEntity" in {
     S.initIfUninitted(session) {
-      val html = Pet.selectEntity(Full(pet2), (pet: Pet) => pet.id, (pet: Pet) => pet.name.getOrElse(""), (choice: Box[Pet]) => {})
+      val html = Pet.selectEntity(Full(pet2), _.id, _.name.getOrElse(""), (choice: Box[Pet]) => {})
+      println("select html=" + html)
+      html.toString.contains("Spot") must beTrue
+      html.toString.contains("Fluffy") must beTrue
+    }
+  }
+
+  "it should handle selectEntity with no default" in {
+    S.initIfUninitted(session) {
+      val html = Pet.selectEntity(Empty, _.id, _.name.getOrElse(""), (choice: Box[Pet]) => {})
+      println("select html=" + html)
+      html.toString.contains("Spot") must beTrue
+      html.toString.contains("Fluffy") must beTrue
+    }
+  }
+
+  "it should handle selectEntityId" in {
+    S.initIfUninitted(session) {
+      val html = Pet.selectEntityId(Full(pet2.id), _.id, _.name.getOrElse(""), (choice: Long) => {})
       println("select html=" + html)
       html.toString.contains("Spot") must beTrue
       html.toString.contains("Fluffy") must beTrue
