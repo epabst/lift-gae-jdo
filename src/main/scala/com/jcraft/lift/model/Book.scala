@@ -76,10 +76,10 @@ object Book extends JdoCRUDOps[Key,Book] {
       Field(Text("Author"), true, true, authorFieldForForm, (book: Book) => Text(book.author.name)))
   }
 
-  def authorFieldForForm(book: Book) = {
-    val choices = Author.findAll.map(author => (keyToString(author.id) -> author.name)).toList
+  def authorFieldForForm(book: Book): NodeSeq = {
+    val choices = Author.findAll.map(author => (keyToString(author.id) -> author.name))
     val default = Box.legacyNullTest(book.author).map(author => keyToString(author.id))
-    select(choices, default, (id) => if(book.author==null) book.author = Author.findById(stringToKey(id)).getOrElse(null))
+    if(book.author==null) { select(choices, default, (id) => book.author = Author.findById(stringToKey(id)).getOrElse(null)) } else Text(book.author.name)
   }
 
   override def pageWrap(body: NodeSeq) = <lift:surround with="defaultWithDatePicker" at="content">{ body }</lift:surround>
