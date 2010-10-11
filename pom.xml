@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.scala_libs</groupId>
   <artifactId>lift-gae-jdo_${scala.version}</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>lift-gae-jdo</name>
   <inceptionYear>2010</inceptionYear>
