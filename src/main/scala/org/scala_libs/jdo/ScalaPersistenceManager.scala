@@ -25,7 +25,7 @@ class ScalaPersistenceManager(val javaPM : PersistenceManager) {
       case null => None
       case a => Some(a)
     }
-  def getObjectsById[A](c:Class[A], keys:Seq[Object]):Collection[A] = {
+  def getObjectsById[A](c:Class[A], keys:Seq[Object]):Seq[A] = {
     //do them one at a time because datanucleus wasn't working for some reason in bulk
     keys.map{getObjectById(c, _)}.filter(_.isDefined).map(_.get)
   }

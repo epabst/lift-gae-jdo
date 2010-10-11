@@ -16,7 +16,7 @@
 package org.scala_libs.jdo
 
 import javax.jdo._
-import _root_.scala.collection.jcl.Conversions.convertList
+import scala.collection.JavaConversions._
 import _root_.scala.collection.mutable.Queue
 import _root_.java.util.Arrays
 import _root_.java.util.{List => JList}
@@ -40,7 +40,7 @@ class ScalaQuery[A](javaPM:PersistenceManager, val clss:Class[A]){
 
   def resultList(): List[A] = {
     val q = newQuery
-    convertList[A](q.executeWithArray(parameters:_*).asInstanceOf[JList[A]]).toList
+    asBuffer(q.executeWithArray(parameters:_*).asInstanceOf[JList[A]]).toList
   }
 
   def findOne():Option[A] = toOption(getSingleResult)

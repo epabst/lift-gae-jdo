@@ -1,13 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.scala_libs</groupId>
-  <artifactId>lift-gae-jdo</artifactId>
+  <artifactId>lift-gae-jdo_${scala.version}</artifactId>
   <version>1.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>lift-gae-jdo</name>
   <inceptionYear>2010</inceptionYear>
   <properties>
-    <scala.version>2.7.7</scala.version>
+    <scala.version>2.8.0</scala.version>
     <gae.version>1.3.5</gae.version>
   </properties>
 
@@ -54,13 +54,13 @@
     </dependency>
     <dependency>
       <groupId>net.liftweb</groupId>
-      <artifactId>lift-core</artifactId>
-      <version>1.1-M8</version>
+      <artifactId>lift-webkit_${scala.version}</artifactId>
+      <version>2.1</version>
     </dependency>
     <dependency>
-      <groupId>org.scala-tools.javautils</groupId>
-      <artifactId>javautils_2.7.7</artifactId>
-      <version>0.2</version>
+      <groupId>net.liftweb</groupId>
+      <artifactId>lift-mapper_${scala.version}</artifactId>
+      <version>2.1</version>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
@@ -70,8 +70,8 @@
     </dependency>
     <dependency>
       <groupId>org.scala-tools.testing</groupId>
-      <artifactId>specs_2.7.7</artifactId>
-      <version>1.6.1</version>
+      <artifactId>specs_${scala.version}</artifactId>
+      <version>1.6.5</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -143,6 +143,12 @@
       <artifactId>datanucleus-appengine</artifactId>
       <version>1.0.7.final</version>
       <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.5</version>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
