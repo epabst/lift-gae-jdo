@@ -40,5 +40,5 @@ object Genre extends Enumeration{
   }
 
   def getNameDescriptionList =  
-    elements.toList.map(v => (v.toString, getDescriptionOrName(v))).toList
+    values.toList.map(v => (v.toString, getDescriptionOrName(v))).toList
 }

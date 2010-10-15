@@ -25,12 +25,12 @@ import xml.{NodeSeq, Text, UnprefixedAttribute, Null}
 import com.google.appengine.api.datastore.Key
 import org.scala_libs.lift.crud.jdo.GaeCRUDOps
 
-@PersistenceCapable{val identityType = IdentityType.APPLICATION,
-                    val detachable="true"}
+@PersistenceCapable(identityType = IdentityType.APPLICATION,
+                    detachable="true")
 class Book {
 
   @PrimaryKey
-  @Persistent{val valueStrategy = IdGeneratorStrategy.IDENTITY}
+  @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
   var id : Key = _
 
   @Persistent
@@ -42,7 +42,7 @@ class Book {
   @Persistent
   var genre : String = Genre.unknown.toString
 
-  @Persistent{ val defaultFetchGroup="true"}
+  @Persistent(defaultFetchGroup="true")
   var author : Author = _
 }
 
@@ -69,7 +69,7 @@ object Book extends GaeCRUDOps[Book] {
         (book: Book) => Text(formatter.format(book.published))),
       Field(Text("Genre"), true, true,
         (book: Book) => select(Genre.getNameDescriptionList, (Box.legacyNullTest(book.genre).map(_.toString) or Full("")),
-          choice => book.genre = Genre.valueOf(choice).getOrElse("").toString),
+          choice => book.genre = Genre.withName(choice).toString),
         (book: Book) => Text(if(book.genre != null) book.genre.toString else "")),
       Field(Text("Author"), true, true, authorFieldForForm, (book: Book) => Text(book.author.name)))
   }

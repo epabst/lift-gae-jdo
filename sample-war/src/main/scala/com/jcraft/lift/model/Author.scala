@@ -25,19 +25,18 @@ import org.scala_libs.lift.crud.jdo.GaeCRUDOps
 /**
   An author is someone who writes books.
 */
-@PersistenceCapable{val identityType = IdentityType.APPLICATION,
-                    val detachable="true"}
+@PersistenceCapable(identityType = IdentityType.APPLICATION,
+                    detachable="true")
 class Author {
 
   @PrimaryKey
-  @Persistent{val valueStrategy = IdGeneratorStrategy.IDENTITY}
+  @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
   var id : Key = _
 
   @Persistent
   var name : String = ""
 
-  @Persistent{val mappedBy = "author",
-              val defaultFetchGroup="true"}
+  @Persistent(mappedBy = "author", defaultFetchGroup="true")
   var books : java.util.List[Book] = new java.util.LinkedList[Book]
 
   def findBooks = {
