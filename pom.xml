@@ -6,9 +6,17 @@
   <packaging>pom</packaging>
   <name>lift-gae-jdo-parent</name>
   <inceptionYear>2010</inceptionYear>
+
   <properties>
-    <scala.version>2.8.0</scala.version>
-    <gae.version>1.3.5</gae.version>
+    <maven.compiler.source>1.6</maven.compiler.source>
+    <maven.compiler.target>1.6</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <scala.version>2.8.1</scala.version>
+    <lift.version>2.2</lift.version>
+    <slf4j.version>1.6.1</slf4j.version>
+    <gae.version>1.4.0</gae.version>
+    <datanucleus.version>1.1.5</datanucleus.version>
+    <datanucleus.enhancer.version>1.1.4</datanucleus.enhancer.version>
   </properties>
 
   <modules>
@@ -16,63 +24,192 @@
     <module>sample-war</module>
   </modules>
 
-  <repositories>
-    <repository>
-      <id>central</id>
-      <name>Maven Repository Switchboard</name>
-      <layout>default</layout>
-      <url>http://www.ibiblio.org/maven2</url>
-      <snapshots><enabled>false</enabled></snapshots>
-    </repository>
-    <repository>
-      <id>maven-gae-plugin-repo</id>
-      <name>maven-gae-plugin repository</name>
-      <url>http://maven-gae-plugin.googlecode.com/svn/repository</url>
-    </repository>
-  </repositories>
-
-  <pluginRepositories>
-    <pluginRepository>
-      <id>central</id>
-      <name>Maven Repository Switchboard</name>
-      <layout>default</layout>
-      <url>http://www.ibiblio.org/maven2</url>
-      <snapshots><enabled>false</enabled></snapshots>
-    </pluginRepository>
-    <pluginRepository>
-      <id>scala-tools.org</id>
-      <name>Scala-Tools Maven2 Repository</name>
-      <url>http://scala-tools.org/repo-releases</url>
-    </pluginRepository>
-    <pluginRepository>
-      <id>maven-gae-plugin-repo</id>
-      <name>maven-gae-plugin repository</name>
-      <url>http://maven-gae-plugin.googlecode.com/svn/repository</url>
-    </pluginRepository>
-  </pluginRepositories>
-
   <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-eclipse-plugin</artifactId>
-        <configuration>
-          <downloadSources>true</downloadSources>
-          <excludes>
-            <exclude>org.scala-lang:scala-library</exclude>
-          </excludes>
-          <classpathContainers>
-            <classpathContainer>ch.epfl.lamp.sdt.launching.SCALA_CONTAINER</classpathContainer>
-          </classpathContainers>
-          <projectnatures>
-            <java.lang.String>ch.epfl.lamp.sdt.core.scalanature</java.lang.String>
-            <java.lang.String>org.eclipse.jdt.core.javanature</java.lang.String>
-          </projectnatures>
-          <buildcommands>
-            <java.lang.String>ch.epfl.lamp.sdt.core.scalabuilder</java.lang.String>
-          </buildcommands>
-        </configuration>
-      </plugin>
-    </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.scala-tools</groupId>
+          <artifactId>maven-scala-plugin</artifactId>
+          <version>2.15.0</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>compile</goal>
+                <goal>testCompile</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <scalaVersion>${scala.version}</scalaVersion>
+              <args>
+                <arg>-unchecked</arg>
+                <arg>-deprecation</arg>
+                <arg>-explaintypes</arg>
+              </args>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>net.kindleit</groupId>
+          <artifactId>maven-gae-plugin</artifactId>
+          <version>0.8.0</version>
+          <configuration>
+            <serverId>appengine.google.com</serverId>
+          </configuration>
+          <dependencies>
+            <dependency>
+              <groupId>net.kindleit</groupId>
+              <artifactId>gae-runtime</artifactId>
+              <version>${gae.version}</version>
+              <type>pom</type>
+            </dependency>
+          </dependencies>
+        </plugin>
+        <plugin>
+          <groupId>org.datanucleus</groupId>
+          <artifactId>maven-datanucleus-plugin</artifactId>
+          <version>2.2.1</version>
+          <configuration>
+            <api>JDO</api>
+            <enhancerName>ASM</enhancerName>
+            <fork>false</fork>
+            <jdkLogConfiguration>WEB_INF/logging.properties</jdkLogConfiguration>
+            <metadataIncludes>**/model/*.class</metadataIncludes>
+            <verbose>true</verbose>
+          </configuration>
+          <executions>
+            <execution>
+              <phase>process-classes</phase>
+              <goals>
+                <goal>enhance</goal>
+              </goals>
+            </execution>
+          </executions>
+          <dependencies>
+            <dependency>
+              <groupId>org.datanucleus</groupId>
+              <artifactId>datanucleus-enhancer</artifactId>
+              <version>${datanucleus.enhancer.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>org.datanucleus</groupId>
+              <artifactId>datanucleus-core</artifactId>
+              <version>${datanucleus.version}</version>
+              <exclusions>
+                <exclusion>
+                  <groupId>javax.transaction</groupId>
+                  <artifactId>transaction-api</artifactId>
+                </exclusion>
+              </exclusions>
+            </dependency>
+            <dependency>
+              <groupId>org.datanucleus</groupId>
+              <artifactId>datanucleus-rdbms</artifactId>
+              <version>${datanucleus.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>org.datanucleus</groupId>
+              <artifactId>datanucleus-enhancer</artifactId>
+              <version>${datanucleus.enhancer.version}</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.7.1</version>
+          <configuration>
+            <includes>
+              <!-- Run the Scala specs tests. See http://code.google.com/p/specs/wiki/RunningSpecs for details. -->
+              <include>**/*Spec.java</include>
+            </includes>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-eclipse-plugin</artifactId>
+          <configuration>
+            <downloadSources>true</downloadSources>
+            <excludes>
+              <exclude>org.scala-lang:scala-library</exclude>
+            </excludes>
+            <classpathContainers>
+              <classpathContainer>ch.epfl.lamp.sdt.launching.SCALA_CONTAINER</classpathContainer>
+            </classpathContainers>
+            <projectnatures>
+              <java.lang.String>ch.epfl.lamp.sdt.core.scalanature</java.lang.String>
+              <java.lang.String>org.eclipse.jdt.core.javanature</java.lang.String>
+            </projectnatures>
+            <buildcommands>
+              <java.lang.String>ch.epfl.lamp.sdt.core.scalabuilder</java.lang.String>
+            </buildcommands>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- Using the JDO 2 API. -->
+      <dependency>
+        <groupId>javax.jdo</groupId>
+        <artifactId>jdo2-api</artifactId>
+        <version>2.3-eb</version>
+        <exclusions>
+          <exclusion>
+            <groupId>javax.transaction</groupId>
+            <artifactId>transaction-api</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>javax.transaction</groupId>
+        <artifactId>jta</artifactId>
+        <version>1.1</version>
+      </dependency>
+      <!-- Is the core unit test framework. -->
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.8.2</version>
+        <scope>test</scope>
+      </dependency>
+      <!-- Is the Scala specs testing framework. -->
+      <dependency>
+        <groupId>org.scala-tools.testing</groupId>
+        <artifactId>specs_${scala.version}</artifactId>
+        <version>1.6.7</version>
+        <scope>test</scope>
+      </dependency>
+      <!--
+        Below are the three GAE libraries for local testing as described here:
+        http://code.google.com/appengine/docs/java/howto/unittesting.html
+      -->
+      <dependency>
+        <groupId>com.google.appengine</groupId>
+        <artifactId>appengine-api-labs</artifactId>
+        <version>${gae.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.google.appengine</groupId>
+        <artifactId>appengine-api-stubs</artifactId>
+        <version>${gae.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.google.appengine</groupId>
+        <artifactId>appengine-testing</artifactId>
+        <version>${gae.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <!-- Use JDK logging on GAE/J. -->
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-jdk14</artifactId>
+        <version>${slf4j.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 </project>

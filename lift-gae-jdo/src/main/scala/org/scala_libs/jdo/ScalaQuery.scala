@@ -40,7 +40,7 @@ class ScalaQuery[A](javaPM:PersistenceManager, val clss:Class[A]){
 
   def resultList(): List[A] = {
     val q = newQuery
-    asBuffer(q.executeWithArray(parameters:_*).asInstanceOf[JList[A]]).toList
+    asScalaBuffer(q.executeWithArray(parameters:_*).asInstanceOf[JList[A]]).toList
   }
 
   def findOne():Option[A] = toOption(getSingleResult)

@@ -1,7 +1,7 @@
 package org.scala_libs.lift.crud.jdo
 
 import org.scala_libs.jdo.{JdoConfig, ScalaPersistenceManager}
-import org.apache.log4j.Logger
+import _root_.net.liftweb.common.Loggable
 import net.liftweb.common.Box
 import org.scala_libs.lift.crud.KeyedCRUDOps
 
@@ -10,8 +10,7 @@ import org.scala_libs.lift.crud.KeyedCRUDOps
  * @author epabst@gmail.com
  */
 
-trait JdoCRUDOps[IdType <: Object,Entity <: Any] extends KeyedCRUDOps[IdType,Entity] {
-  private val logger = new net.liftweb.util.Log4JLogger(Logger.getLogger("org.scala_libs.lift.crud.jdo.JdoCRUDOps"))
+trait JdoCRUDOps[IdType <: Object,Entity <: Any] extends KeyedCRUDOps[IdType,Entity] with Loggable {
   /** entityClass is needed for the default implementations of create and findAll */
   val entityClass: Class[Entity]
   def create = { val entity = entityClass.newInstance; logger.debug("created " + entity); entity }

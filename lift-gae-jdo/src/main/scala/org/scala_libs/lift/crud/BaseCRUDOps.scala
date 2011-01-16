@@ -23,7 +23,6 @@ import net.liftweb.http._
 import net.liftweb.sitemap._
 import net.liftweb.util._
 import Helpers._
-import org.apache.log4j.Logger
 
 /** This enumeration defines the possible operations for CRUD */
 object CrudOperations extends Enumeration {
@@ -394,10 +393,6 @@ trait BaseCRUDOps[EntityType] {
   }
   
   def menus : List[Menu] = List(deleteMenu, editMenu, viewMenu, listMenu, createMenu)
-}
-
-object BaseCRUDOps {
-  val logger = new net.liftweb.util.Log4JLogger(Logger.getLogger("org.scala_libs.lift.crud.BaseCRUDOps"))
 }
 
 trait KeyedCRUDOps[KeyType,Entity <: Any] extends BaseCRUDOps[Entity] {
